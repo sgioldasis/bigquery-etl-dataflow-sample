@@ -21,4 +21,6 @@ set -e
 # # Move protoc3/include to /usr/local/include/
 # sudo mv protoc3/include/* /usr/local/include/
 
-sudo apt-get install libprotobuf-java protobuf-compiler
+sudo apt-get update
+
+sudo apt-get install protobuf-compiler
