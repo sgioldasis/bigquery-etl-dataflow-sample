@@ -152,12 +152,12 @@
             <!-- <scope>runtime</scope> -->
         </dependency>
 
-        <!-- <dependency>
+        <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-runners-direct-java</artifactId>
             <version>2.9.0</version>
             <scope>test</scope>
-        </dependency> -->
+        </dependency>
 
         <dependency>
             <groupId>org.apache.beam</groupId>
