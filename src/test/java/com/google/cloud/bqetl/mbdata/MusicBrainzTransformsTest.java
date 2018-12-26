@@ -88,49 +88,49 @@ public class MusicBrainzTransformsTest {
     PAssert.that(artistCreditIdPCollection).containsInAnyOrder(634509L, 846332L);
   }
 
-  @org.junit.Test
-  public void joinArtistCreditsWithRecordings() {
+//   @org.junit.Test
+//   public void joinArtistCreditsWithRecordings() {
 
-//    DirectPipeline p = DirectPipeline.createForTest();
-    Pipeline p = TestPipeline.create();
+// //    DirectPipeline p = DirectPipeline.createForTest();
+//     Pipeline p = TestPipeline.create();
 
-    PCollection<String> artistCreditText = p.apply("artistCredits", Create.of(artistCreditLinesOfJson)).setCoder(StringUtf8Coder.of());
-    PCollection<KV<Long, MusicBrainzDataObject>> artistCredits = MusicBrainzTransforms.loadTableFromText(artistCreditText, "artist_credit_name", "artist_credit");
+//     PCollection<String> artistCreditText = p.apply("artistCredits", Create.of(artistCreditLinesOfJson)).setCoder(StringUtf8Coder.of());
+//     PCollection<KV<Long, MusicBrainzDataObject>> artistCredits = MusicBrainzTransforms.loadTableFromText(artistCreditText, "artist_credit_name", "artist_credit");
 
-    PCollection<String> recordingText = p.apply("recordings", Create.of(recordingLinesOfJson)).setCoder(StringUtf8Coder.of());
-    PCollection<KV<Long, MusicBrainzDataObject>> recordings = MusicBrainzTransforms.loadTableFromText(recordingText, "recording", "artist_credit");
+//     PCollection<String> recordingText = p.apply("recordings", Create.of(recordingLinesOfJson)).setCoder(StringUtf8Coder.of());
+//     PCollection<KV<Long, MusicBrainzDataObject>> recordings = MusicBrainzTransforms.loadTableFromText(recordingText, "recording", "artist_credit");
 
-    PCollection<MusicBrainzDataObject> joinedRecordings = MusicBrainzTransforms.innerJoin("artist credits with recordings", artistCredits, recordings);
+//     PCollection<MusicBrainzDataObject> joinedRecordings = MusicBrainzTransforms.innerJoin("artist credits with recordings", artistCredits, recordings);
 
-    PCollection<Long> recordingIds = joinedRecordings.apply(
-        MapElements
-        .into(new TypeDescriptor<Long>() { })
-        .via((MusicBrainzDataObject mbo) -> (Long) mbo.getColumnValue("recording_id"))
-//          .withOutputType(new TypeDescriptor<Long>() { })
-    );
+//     PCollection<Long> recordingIds = joinedRecordings.apply(
+//         MapElements
+//         .into(new TypeDescriptor<Long>() { })
+//         .via((MusicBrainzDataObject mbo) -> (Long) mbo.getColumnValue("recording_id"))
+// //          .withOutputType(new TypeDescriptor<Long>() { })
+//     );
 
-    Long bieberRecording = 17069165L;
-    Long bieberRecording2 = 15508507L;
-
-
-    PAssert.that(recordingIds).satisfies((longs) -> {
-      List<Long> theList = new ArrayList<Long>();
-      longs.forEach(theList::add);
-      assert (theList.contains(bieberRecording));
-      assert (theList.contains(bieberRecording2));
-      return null;
-    });
-
-    PCollection<Long> numberJoined = joinedRecordings.apply("count joined recrodings", Count.globally());
-    PCollection<Long> numberOfArtistCredits = artistCredits.apply("count artist credits", Count.globally());
-
-    //DirectRunner.EvaluationResults results = p.run();
-//    PipelineResult results = p.run();
+//     Long bieberRecording = 17069165L;
+//     Long bieberRecording2 = 15508507L;
 
 
-//    long joinedRecordingsCount = results.getPCollection(numberJoined).get(0);
-//    assert (448 == joinedRecordingsCount);
-  }
+//     PAssert.that(recordingIds).satisfies((longs) -> {
+//       List<Long> theList = new ArrayList<Long>();
+//       longs.forEach(theList::add);
+//       assert (theList.contains(bieberRecording));
+//       assert (theList.contains(bieberRecording2));
+//       return null;
+//     });
+
+//     PCollection<Long> numberJoined = joinedRecordings.apply("count joined recrodings", Count.globally());
+//     PCollection<Long> numberOfArtistCredits = artistCredits.apply("count artist credits", Count.globally());
+
+//     //DirectRunner.EvaluationResults results = p.run();
+// //    PipelineResult results = p.run();
+
+
+// //    long joinedRecordingsCount = results.getPCollection(numberJoined).get(0);
+// //    assert (448 == joinedRecordingsCount);
+//   }
 
   @org.junit.Test
   public void loadArtistsWithMapping() {
