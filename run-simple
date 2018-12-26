@@ -1,0 +1,13 @@
+#!/bin/sh
+mvn compile exec:java \
+  -Dexec.mainClass=com.google.cloud.bqetl.BQETLSimple \
+  -Dexec.args="--project=business-intelligence-1 \
+    --loadingBucketURL=gs://solutions-public-assets/bqetl \
+    --stagingLocation=gs://mhospitality/dataflow/staging \
+    --runner=DataflowRunner \
+    --numWorkers=20 \
+    --maxNumWorkers=72 \
+    --bigQueryTablename=business-intelligence-1:dw.simple_artist_recordings\
+    --diskSizeGb=100 \
+    --workerMachineType=n1-standard-1"
+
