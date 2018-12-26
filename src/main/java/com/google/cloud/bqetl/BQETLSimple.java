@@ -22,11 +22,18 @@ import com.google.cloud.bqetl.mbdata.MusicBrainzDataObject;
 import com.google.cloud.bqetl.mbdata.MusicBrainzTransforms;
 import com.google.cloud.bqetl.mbschema.FieldSchemaListBuilder;
 import com.google.cloud.bqetl.options.BQETLOptions;
-import com.google.cloud.dataflow.sdk.Pipeline;
-import com.google.cloud.dataflow.sdk.io.BigQueryIO;
-import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
-import com.google.cloud.dataflow.sdk.values.KV;
-import com.google.cloud.dataflow.sdk.values.PCollection;
+
+//import com.google.cloud.dataflow.sdk.Pipeline;
+//import com.google.cloud.dataflow.sdk.io.BigQueryIO;
+//import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
+//import com.google.cloud.dataflow.sdk.values.KV;
+//import com.google.cloud.dataflow.sdk.values.PCollection;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.values.KV;
+import org.apache.beam.sdk.values.PCollection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,14 +117,13 @@ public class BQETLSimple {
          * write the tablerows to Big Query
          */
     //[START bigQueryWrite]
-    tableRows.apply(BigQueryIO.Write
-        .named("Write")
+    tableRows.apply("Write", BigQueryIO.writeTableRows()
         .to(BQETLOptions.getBigQueryTablename())
         .withSchema(bqTableSchema)
         .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
         .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
     //[END bigQueryWrite]
-    p.run();
+    p.run().waitUntilFinish();
   }
 
 

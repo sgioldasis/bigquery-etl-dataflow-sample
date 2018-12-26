@@ -15,9 +15,13 @@
  */
 package com.google.cloud.bqetl.options;
 
-import com.google.cloud.dataflow.sdk.options.Default;
-import com.google.cloud.dataflow.sdk.options.Description;
-import com.google.cloud.dataflow.sdk.options.PipelineOptions;
+//import com.google.cloud.dataflow.sdk.options.Default;
+//import com.google.cloud.dataflow.sdk.options.Description;
+//import com.google.cloud.dataflow.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptions;
+
 
 /**
  *  The specific pipeline options for this project.

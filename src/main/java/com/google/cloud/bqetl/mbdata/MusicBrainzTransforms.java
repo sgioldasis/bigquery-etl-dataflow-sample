@@ -22,13 +22,25 @@ import com.google.api.services.bigquery.model.TableSchema;
 import com.google.cloud.bqetl.json.JSONReader;
 import com.google.cloud.bqetl.mbschema.FieldSchemaListBuilder;
 import com.google.cloud.bqetl.options.BQETLOptions;
-import com.google.cloud.dataflow.sdk.Pipeline;
-import com.google.cloud.dataflow.sdk.io.TextIO;
-import com.google.cloud.dataflow.sdk.transforms.*;
-import com.google.cloud.dataflow.sdk.transforms.join.CoGbkResult;
-import com.google.cloud.dataflow.sdk.transforms.join.CoGroupByKey;
-import com.google.cloud.dataflow.sdk.transforms.join.KeyedPCollectionTuple;
-import com.google.cloud.dataflow.sdk.values.*;
+
+//import com.google.cloud.dataflow.sdk.Pipeline;
+//import com.google.cloud.dataflow.sdk.io.TextIO;
+//import com.google.cloud.dataflow.sdk.transforms.*;
+//import com.google.cloud.dataflow.sdk.transforms.join.CoGbkResult;
+//import com.google.cloud.dataflow.sdk.transforms.join.CoGroupByKey;
+//import com.google.cloud.dataflow.sdk.transforms.join.KeyedPCollectionTuple;
+//import com.google.cloud.dataflow.sdk.values.*;
+
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.transforms.*;
+import org.apache.beam.sdk.transforms.join.CoGbkResult;
+import org.apache.beam.sdk.transforms.join.CoGroupByKey;
+import org.apache.beam.sdk.transforms.join.KeyedPCollectionTuple;
+import org.apache.beam.sdk.values.*;
+
+import org.apache.beam.sdk.transforms.PTransform.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +62,7 @@ public class MusicBrainzTransforms {
    *              note that the column value is assumed to be a Long
    */
   public static PCollection<KV<Long, MusicBrainzDataObject>> by(String name, PCollection<MusicBrainzDataObject> input) {
-    return input.apply("by " + name, MapElements.via(
+    return input.apply("by " + name, MapElements.into(new TypeDescriptor<KV<Long, MusicBrainzDataObject>>(){}).via(
         (MusicBrainzDataObject inputObject) -> {
           try {
             return KV.of((Long) inputObject.getColumnValue(name), inputObject);
@@ -58,8 +70,9 @@ public class MusicBrainzTransforms {
             logger.error(" exception in by " + name, e);
             return null;
           }
-        }).withOutputType(new TypeDescriptor<KV<Long, MusicBrainzDataObject>>() {
-    }));
+        })
+	//	    .withOutputType(new TypeDescriptor<KV<Long, MusicBrainzDataObject>>() {})
+	);
   }
 
   private static PCollection<KV<Long, CoGbkResult>> group(String name,
@@ -96,7 +109,9 @@ public class MusicBrainzTransforms {
     PCollection<KV<Long, CoGbkResult>> joinedResult = group(name, table1, table2, t1, t2);
     // [END innerJoin]
     // [START mergeJoinResults]
-    PCollection<List<MusicBrainzDataObject>> mergedResult = joinedResult.apply("merge join results", MapElements.via((KV<Long, CoGbkResult> group) -> {
+    PCollection<List<MusicBrainzDataObject>> mergedResult = joinedResult.apply("merge join results", 
+      MapElements.into(new TypeDescriptor<List<MusicBrainzDataObject>>() { })
+      .via((KV<Long, CoGbkResult> group) -> {
       List<MusicBrainzDataObject> result = new ArrayList<MusicBrainzDataObject>();
       Iterable<MusicBrainzDataObject> leftObjects = group.getValue().getAll(t1);
       Iterable<MusicBrainzDataObject> rightObjects = group.getValue().getAll(t2);
@@ -106,11 +121,12 @@ public class MusicBrainzTransforms {
         });
       });
       return result;
-    }).withOutputType(new TypeDescriptor<List<MusicBrainzDataObject>>() {
-    }));
+    })
+    //  .withOutputType(new TypeDescriptor<List<MusicBrainzDataObject>>() { })
+    );
 // [END mergeJoinResults]
 // [START flattenMergedResults]
-    return mergedResult.apply(new Flatten.FlattenIterables<>());
+    return mergedResult.apply(Flatten.<MusicBrainzDataObject>iterables());
 // [END flattenMergedResults]
   }
 
@@ -130,7 +146,10 @@ public class MusicBrainzTransforms {
     final TupleTag<MusicBrainzDataObject> childTag = new TupleTag<MusicBrainzDataObject>();
 
     PCollection<KV<Long, CoGbkResult>> joinedResult = group("nest " + nestingKey, parent, child, parentTag, childTag);
-    return joinedResult.apply("merge join results " + nestingKey, MapElements.via((KV<Long, CoGbkResult> group) -> {
+    return joinedResult.apply("merge join results " + nestingKey, 
+      MapElements
+      .into(new TypeDescriptor<MusicBrainzDataObject>() { })
+      .via((KV<Long, CoGbkResult> group) -> {
       MusicBrainzDataObject parentObject = group.getValue().getOnly(parentTag);
       Iterable<MusicBrainzDataObject> children = group.getValue().getAll(childTag);
       List<MusicBrainzDataObject> childList = new ArrayList<MusicBrainzDataObject>();
@@ -138,8 +157,9 @@ public class MusicBrainzTransforms {
       parentObject = parentObject.duplicate();
       parentObject.addColumnValue("recordings", childList);
       return parentObject;
-    }).withOutputType(new TypeDescriptor<MusicBrainzDataObject>() {
-    }));
+    })
+    //  .withOutputType(new TypeDescriptor<MusicBrainzDataObject>() { })
+    );
   }
   // [END nestTransform]
 
@@ -177,11 +197,13 @@ public class MusicBrainzTransforms {
   public static PCollection<TableRow> transformToTableRows(PCollection<MusicBrainzDataObject> objects, TableSchema schema) {
     Map<String, Object> serializableSchema = serializeableTableSchema(schema);
     return objects.apply("Big Query TableRow Transform",
-        MapElements.via((MusicBrainzDataObject inputObject) -> {
+        MapElements.into(new TypeDescriptor<List<TableRow>>() { })
+	.via((MusicBrainzDataObject inputObject) -> {
           List<TableRow> rows = toTableRows(inputObject, serializableSchema);
           return rows;
-        }).withOutputType(new TypeDescriptor<List<TableRow>>() {
-        })).apply(new Flatten.FlattenIterables<>());
+        })
+	//.withOutputType(new TypeDescriptor<List<TableRow>>() { })
+	).apply(Flatten.<TableRow>iterables());
   }
 
   /**
@@ -320,12 +342,15 @@ public class MusicBrainzTransforms {
   // [START loadTableByValue]
   public static PCollection<KV<Long, MusicBrainzDataObject>> loadTableFromText(PCollection<String> text, String name, String keyName) {
     final String namespacedKeyname = name + "_" + keyName;
-    return text.apply("load " + name, MapElements.via((String input) -> {
+    return text.apply("load " + name, 
+	MapElements.into(new TypeDescriptor<KV<Long, MusicBrainzDataObject>>() {})	    
+		    .via((String input) -> {
       MusicBrainzDataObject datum = JSONReader.readObject(name, input);
       Long key = (Long) datum.getColumnValue(namespacedKeyname);
       return KV.of(key, datum);
-    }).withOutputType(new TypeDescriptor<KV<Long, MusicBrainzDataObject>>() {
-    }));
+    })
+     // .withOutputType(new TypeDescriptor<KV<Long, MusicBrainzDataObject>>() {})
+    );
   }
   // [END loadTableByValue]
 
@@ -338,9 +363,11 @@ public class MusicBrainzTransforms {
    * @return PCollection of MusicBrainzDataObjects
    */
   public static PCollection<MusicBrainzDataObject> loadTableFromText(PCollection<String> text, String name) {
-    return text.apply("load : " + name, MapElements.via((String input) -> JSONReader.readObject(name, input))
-        .withOutputType(new TypeDescriptor<MusicBrainzDataObject>() {
-        }));
+    return text.apply("load : " + name, 
+	 MapElements.into(new TypeDescriptor<MusicBrainzDataObject>() { })
+	 .via((String input) -> JSONReader.readObject(name, input))
+         //.withOutputType(new TypeDescriptor<MusicBrainzDataObject>() { })
+	);
   }
 
   /**
@@ -367,13 +394,16 @@ public class MusicBrainzTransforms {
     String keyKeyName = "_" + keyKey;
     String valueKeyName = "_" + valueKey;
 
-    PCollection<KV<Long, String>> entries = text.apply(MapElements.via((String input) -> {
+    PCollection<KV<Long, String>> entries = text.apply(
+      MapElements.into(new TypeDescriptor<KV<Long, String>>() { })
+      .via((String input) -> {
       MusicBrainzDataObject object = JSONReader.readObject("", input);
       Long key = (Long) object.getColumnValue(keyKeyName);
       String value = (String) object.getColumnValue(valueKeyName);
       return KV.of(key, value);
-    }).withOutputType(new TypeDescriptor<KV<Long, String>>() {
-    }));
+    })
+      //.withOutputType(new TypeDescriptor<KV<Long, String>>() { })
+    );
 
     return entries.apply(View.<Long, String>asMap());
   }
@@ -410,8 +440,8 @@ public class MusicBrainzTransforms {
                                                                                Map<String, PCollectionView<Map<Long, String>>> mappings) {
     final String namespacedKeyname = name + "_" + keyName;
 
-    return text.apply(ParDo.named("load with mappings").of(new DoFn<String, KV<Long, MusicBrainzDataObject>>() {
-      @Override
+    return text.apply("load with mappings", ParDo.of(new DoFn<String, KV<Long, MusicBrainzDataObject>>() {
+      @ProcessElement
       public void processElement(ProcessContext processContext) throws Exception {
         String input = processContext.element();
         MusicBrainzDataObject result = JSONReader.readObject(name, input);
@@ -464,7 +494,7 @@ public class MusicBrainzTransforms {
     BQETLOptions options = (BQETLOptions) p.getOptions();
     String loadingBucket = options.getLoadingBucketURL();
     String objectToLoad = storedObjectName(loadingBucket, name);
-    return p.apply(TextIO.Read.named(name).from(objectToLoad));
+    return p.apply(name, TextIO.read().from(objectToLoad));
   }
   // [END loadStrings]
 
