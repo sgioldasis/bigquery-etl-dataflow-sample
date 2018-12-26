@@ -9,13 +9,14 @@
 #!/bin/sh
 set -e
 
-PROTOBUF_VERSION=3.3.0
+# Make sure you grab the latest version
+curl -OL https://github.com/google/protobuf/releases/download/v3.2.0/protoc-3.2.0-linux-x86_64.zip
 
-# check to see if protobuf folder is empty
-if [ ! -d "$HOME/protobuf/lib" ]; then
-  wget https://protobuf.googlecode.com/files/protobuf-${PROTOBUF_VERSION}.tar.gz
-  tar -xzvf protobuf${PROTOBUF_VERSION}.tar.gz
-  cd protobuf-${PROTOBUF_VERSION} && ./configure --prefix=$HOME/protobuf && make && make install
-else
-  echo "Using cached directory."
-fi
+# Unzip
+unzip protoc-3.2.0-linux-x86_64.zip -d protoc3
+
+# Move protoc to /usr/local/bin/
+sudo mv protoc3/bin/* /usr/local/bin/
+
+# Move protoc3/include to /usr/local/include/
+sudo mv protoc3/include/* /usr/local/include/
