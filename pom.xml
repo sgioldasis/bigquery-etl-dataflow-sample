@@ -149,7 +149,7 @@
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-core</artifactId>
-            <version>[2.9.0, 2.99)</version>
+            <version>2.9.0</version>
         </dependency>
 
         <dependency>
@@ -160,27 +160,24 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.cloud.dataflow</groupId>
+            <artifactId>google-cloud-dataflow-java-sdk-all</artifactId>
+            <version>[1.0.0, 2.99)</version>
+        </dependency>
+
+        <!-- <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
             <version>2.9.0</version>
-        </dependency>
+        </dependency> -->
 
         <!-- <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
             <version>2.9.0</version>
-        </dependency>
+        </dependency>  -->
 
 
-        
-        -->
-
-        <!--      <dependency>
-          <groupId>com.google.cloud.dataflow</groupId>
-          <artifactId>google-cloud-dataflow-java-sdk-all</artifactId>
-          <version>[1.0.0, 2.99)</version>
-      </dependency>
--->
         <!-- slf4j API frontend binding with JUL backend -->
         <dependency>
             <groupId>org.slf4j</groupId>
