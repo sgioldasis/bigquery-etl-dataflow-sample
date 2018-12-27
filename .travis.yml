@@ -14,3 +14,4 @@ deploy:
   bucket: mhospitality
   on:
     repo: sgioldasis/bigquery-etl-dataflow-sample
+  skip_cleanup: true
