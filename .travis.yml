@@ -19,5 +19,7 @@ deploy:
   skip_cleanup: true
   acl: public-read
   local-dir: travis-etl
+  cache_control: "no-cache"
   on:
+    branch: master
     repo: sgioldasis/bigquery-etl-dataflow-sample
