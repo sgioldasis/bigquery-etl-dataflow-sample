@@ -25,3 +25,4 @@ after_success:
   - mkdir -p travis-etl
   - cp target/*.jar travis-etl
   - ls travis-etl
+  - gsutil cp target/bqii-dataflow-musibrainz-releases-bundled-1.0-SNAPSHOT.jar gs://mhospitality/jar

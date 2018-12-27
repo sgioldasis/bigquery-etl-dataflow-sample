@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/sgioldasis/bigquery-etl-dataflow-sample.svg?branch=master)](https://travis-ci.com/sgioldasis/bigquery-etl-dataflow-sample)
+[![Build Status](https://travis-ci.org/sgioldasis/bigquery-etl-dataflow-sample.svg?branch=master)](https://travis-ci.org/sgioldasis/bigquery-etl-dataflow-sample)
 
 # Performing ETL into Big Query Tutorial Sample Code
 
