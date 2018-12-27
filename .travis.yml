@@ -1,27 +1,27 @@
 language: java
 cache:
   directories:
-  - "$HOME/gcloud/"
+    - "$HOME/gcloud/"
 env:
-- PATH=$PATH:$HOME/gcloud/google-cloud-sdk/bin GOOGLE_APPLICATION_CREDENTIALS=$TRAVIS_BUILD_DIR/client_secrets.json
+  - PATH=$PATH:$HOME/gcloud/google-cloud-sdk/bin GOOGLE_APPLICATION_CREDENTIALS=$TRAVIS_BUILD_DIR/client_secrets.json
 before_install:
-- openssl aes-256-cbc -K $encrypted_8aceb3c25d70_key -iv $encrypted_8aceb3c25d70_iv
-  -in client_secrets.json.enc -out client_secrets.json -d
-- if [ ! -d $HOME/gcloud/google-cloud-sdk ]; then mkdir -p $HOME/gcloud && wget https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz
-  --directory-prefix=$HOME/gcloud && cd $HOME/gcloud && tar xzf google-cloud-sdk.tar.gz
-  && printf '\ny\n\ny\ny\n' | ./google-cloud-sdk/install.sh && cd $TRAVIS_BUILD_DIR;
-  fi
-- gcloud -q components update
-- if [ -a client_secrets.json ]; then gcloud -q auth activate-service-account --key-file
-  client_secrets.json; fi
-- gsutil ls gs://mhospitality
-- wget https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.zip
-- unzip -qq apache-maven-3.5.4-bin.zip
-- export M2_HOME=$PWD/apache-maven-3.5.4
-- export PATH=$M2_HOME/bin:$PATH
-- chmod +x travis-before.sh
-- sh travis-before.sh
+  - openssl aes-256-cbc -K $encrypted_8aceb3c25d70_key -iv $encrypted_8aceb3c25d70_iv
+    -in client_secrets.json.enc -out client_secrets.json -d
+  - if [ ! -d $HOME/gcloud/google-cloud-sdk ]; then mkdir -p $HOME/gcloud && wget https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz
+    --directory-prefix=$HOME/gcloud && cd $HOME/gcloud && tar xzf google-cloud-sdk.tar.gz
+    && printf '\ny\n\ny\ny\n' | ./google-cloud-sdk/install.sh && cd $TRAVIS_BUILD_DIR;
+    fi
+  # - gcloud -q components update
+  - if [ -a client_secrets.json ]; then gcloud -q auth activate-service-account --key-file
+    client_secrets.json; fi
+  - gsutil ls gs://mhospitality
+  - wget https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.zip
+  - unzip -qq apache-maven-3.5.4-bin.zip
+  - export M2_HOME=$PWD/apache-maven-3.5.4
+  - export PATH=$M2_HOME/bin:$PATH
+  - chmod +x travis-before.sh
+  - sh travis-before.sh
 after_success:
-- mkdir -p travis-etl
-- cp target/*.jar travis-etl
-- ls travis-etl
+  - mkdir -p travis-etl
+  - cp target/*.jar travis-etl
+  - ls travis-etl
