@@ -6,7 +6,7 @@ before_install:
   - export PATH=$M2_HOME/bin:$PATH
   - chmod +x travis-before.sh
   - sh travis-before.sh
-before_deploy:
+after_success:
   - mkdir -p travis-etl
   - cp target/*.jar travis-etl
   - ls travis-etl
